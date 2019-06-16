@@ -11369,7 +11369,6 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 #ifdef BUILD_PLAYERBOT
                     if (botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false) && !pCreature->isInnkeeper())
                     {
-                        ChatHandler(this).PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
                         hasMenuItem = false;
                         break;
                     }
