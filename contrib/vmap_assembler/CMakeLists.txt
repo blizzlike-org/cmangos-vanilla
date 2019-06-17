@@ -56,7 +56,7 @@ if(MSVC)
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER "Extractors")
 endif()
 
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
+install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
 
 # add_executable(vmap_test coordinate_test.cpp)
 # target_link_libraries(vmap_test vmap)

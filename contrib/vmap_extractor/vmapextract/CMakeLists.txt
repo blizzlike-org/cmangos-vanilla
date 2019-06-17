@@ -35,5 +35,5 @@ if(MSVC)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/ExtractResources.sh\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
 endif()
 
-install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/ExtractResources.sh" DESTINATION ${BIN_DIR}/tools)
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
+install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/ExtractResources.sh" DESTINATION ${BIN_DIR})
+install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
