@@ -2421,7 +2421,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     AccountTypes security = SEC_PLAYER;
     std::string last_login = GetMangosString(LANG_ERROR);
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT username,gmlevel,last_ip,last_login FROM account WHERE id = '%u'", accId);
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.username AS username, ra.gmlevel AS gmlevel, a.last_ip AS last_ip, a.last_login AS last_login FROM account AS a INNER JOIN realm_account AS ra ON (ra.acctid = a.id AND ra.realmid = '%u') WHERE a.id = '%u'", realmID, accId);
     if (result)
     {
         Field* fields = result->Fetch();
@@ -4135,8 +4135,8 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
 
     std::string email = emailStr;
     LoginDatabase.escape_string(email);
-    //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
+    //                                                 0           1                       2                     3                      4
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id AS id, a.username AS username, a.last_ip AS last_ip, ra.gmlevel AS gmlevel, a.expansion AS expansion FROM account AS a INNER JOIN realm_access AS ra ON (ra.acctid = a.id AND ra.realmid = '%u') WHERE a.email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), realmID, email.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4154,8 +4154,8 @@ bool ChatHandler::HandleLookupAccountIpCommand(char* args)
     std::string ip = ipStr;
     LoginDatabase.escape_string(ip);
 
-    //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE last_ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str());
+    //                                                 0           1                       2                     3                      4
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id AS id, a.username AS username, a.last_ip AS last_ip, ra.gmlevel AS gmlevel, a.expansion AS expansion FROM account AS a INNER JOIN realm_access AS ra ON (ra.acctid = a.id AND ra.realmid = '%u') WHERE a.last_ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), realmID, ip.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4175,8 +4175,8 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
         return false;
 
     LoginDatabase.escape_string(account);
-    //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), account.c_str());
+    //                                                 0           1                       2                     3                      4
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id AS id, a.username AS username, a.last_ip AS last_ip, ra.gmlevel AS gmlevel, a.expansion AS expansion FROM account AS a INNER JOIN realm_access AS ra ON (ra.acctid = a.id AND ra.realmid = '%u') WHERE a.username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), realmID, account.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }

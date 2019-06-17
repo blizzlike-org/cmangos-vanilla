@@ -182,7 +182,7 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
-    : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER)
+    : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -404,7 +404,7 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
-        QueryResult* result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
+        QueryResult* result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
         if (result)
         {
             Field* fields = result->Fetch();
@@ -453,8 +453,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     std::string rI = fields[0].GetCppString();
 
                     ///- Don't calculate (v, s) if there are already some in the database
-                    std::string databaseV = fields[5].GetCppString();
-                    std::string databaseS = fields[6].GetCppString();
+                    std::string databaseV = fields[4].GetCppString();
+                    std::string databaseS = fields[5].GetCppString();
 
                     DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
 
@@ -486,7 +486,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt.append(VersionChallenge.data(), VersionChallenge.size());
                     uint8 securityFlags = 0;
 
-                    _token = fields[7].GetCppString();
+                    _token = fields[6].GetCppString();
                     if (!_token.empty() && _build >= 8606) // authenticator was added in 2.4.3
                         securityFlags = SECURITY_FLAG_AUTHENTICATOR;
 
@@ -511,8 +511,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     if (securityFlags & SECURITY_FLAG_AUTHENTICATOR)    // Authenticator input
                         pkt << uint8(1);
 
-                    uint8 secLevel = fields[4].GetUInt8();
-                    _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+                    LoadAccountSecurityLevels(fields[1].GetUInt32());
 
                     _localizationName.resize(4);
                     for (int i = 0; i < 4; ++i)
@@ -949,7 +948,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 }
 
                 // Show offline state for unsupported client builds and locked realms (1.x clients not support locked state show)
-                if (!ok_build || (i.second.allowedSecurityLevel > _accountSecurityLevel))
+                if (!ok_build || (i.second.allowedSecurityLevel > GetSecurityLevel(i.second.m_ID)))
                     realmflags = RealmFlags(realmflags | REALM_FLAG_OFFLINE);
 
                 pkt << uint32(i.second.icon);              // realm type
@@ -998,7 +997,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 if (!buildInfo)
                     buildInfo = &i.second.realmBuildInfo;
 
-                uint8 lock = (i.second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
+                uint8 lock = (i.second.allowedSecurityLevel > GetSecurityLevel(i.second.m_ID)) ? 1 : 0;
 
                 RealmFlags realmFlags = i.second.realmflags;
 
@@ -1032,6 +1031,31 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
             break;
         }
     }
+}
+
+AccountTypes AuthSocket::GetSecurityLevel(uint32 realmId) const
+{
+    AccountSecurityMap::const_iterator it = _accountSecurityLevel.find(realmId);
+    if (it == _accountSecurityLevel.end())
+        return SEC_PLAYER;
+    return it->second;
+}
+
+void AuthSocket::LoadAccountSecurityLevels(uint32 accountId)
+{
+    QueryResult* result = LoginDatabase.PQuery("SELECT gmlevel, realmid FROM realm_access WHERE acctid = %u",
+        accountId);
+    if (!result)
+        return;
+
+    do {
+        Field *fields = result->Fetch();
+        AccountTypes security = AccountTypes(fields[0].GetUInt32());
+        int realmId = fields[1].GetInt32();
+        _accountSecurityLevel[realmId] = security;
+    } while (result->NextRow());
+
+    delete result;
 }
 
 /// Resume patch transfer
