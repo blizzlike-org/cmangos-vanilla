@@ -1149,7 +1149,7 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetAccountName.c_str(), gm);
-    LoginDatabase.PExecute("UPDATE account SET gmlevel = '%i' WHERE id = '%u'", gm, targetAccountId);
+    LoginDatabase.PExecute("UPDATE realm_access SET gmlevel = '%i' WHERE realmid = '%u' AND acctid = '%u'", gm, realmID, targetAccountId);
 
     return true;
 }
@@ -6228,7 +6228,7 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
 bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
 {
     ///- Get the accounts with GM Level >0
-    QueryResult* result = LoginDatabase.Query("SELECT username,gmlevel FROM account WHERE gmlevel > 0");
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.username AS username, ra.gmlevel AS gmlevel FROM account AS a INNER JOIN realm_access AS ra ON (ra.acctid = a.id AND ra.realmid = '%u') WHERE ra.gmlevel > 0", realmID);
     if (result)
     {
         SendSysMessage(LANG_GMLIST);

@@ -278,17 +278,18 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     QueryResult* result =
         LoginDatabase.PQuery("SELECT "
-                             "id, "                      //0
-                             "gmlevel, "                 //1
-                             "sessionkey, "              //2
-                             "last_ip, "                 //3
-                             "locked, "                  //4
-                             "v, "                       //5
-                             "s, "                       //6
-                             "mutetime, "                //7
-                             "locale "                   //8
-                             "FROM account "
-                             "WHERE username = '%s'",
+                             "a.id, "                      //0
+                             "ra.gmlevel, "                 //1
+                             "a.sessionkey, "              //2
+                             "a.last_ip, "                 //3
+                             "a.locked, "                  //4
+                             "a.v, "                       //5
+                             "a.s, "                       //6
+                             "a.mutetime, "                //7
+                             "a.locale "                   //8
+                             "FROM account AS a INNER JOIN realm_access ON (ra.acctid = a.id AND ra.realmid = '%u') "
+                             "WHERE a.username = '%s'",
+                             realmID,
                              safe_account.c_str());
 
     // Stop if the account is not found

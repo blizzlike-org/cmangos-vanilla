@@ -24,6 +24,7 @@
 #include "Policies/Singleton.h"
 #include "Util.h"
 #include "Auth/Sha1.h"
+#include "World/World.h"
 
 extern DatabaseType LoginDatabase;
 
@@ -158,7 +159,8 @@ uint32 AccountMgr::GetId(std::string username) const
 
 AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
 {
-    QueryResult* result = LoginDatabase.PQuery("SELECT gmlevel FROM account WHERE id = '%u'", acc_id);
+    DEBUG_LOG("accmgr-getsecurity: %u", realmID);
+    QueryResult* result = LoginDatabase.PQuery("SELECT gmlevel FROM realm_access WHERE realmid = '%u' AND acctid = '%u'", realmID, acc_id);
     if (result)
     {
         AccountTypes sec = AccountTypes((*result)[0].GetInt32());

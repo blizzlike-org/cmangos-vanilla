@@ -44,6 +44,10 @@ class AuthSocket : public MaNGOS::Socket
         AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);
 
         void SendProof(Sha1Hash sha);
+
+        AccountTypes GetSecurityLevel(uint32 realmId) const;
+        void LoadAccountSecurityLevels(uint32 accountId);
+
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
         int32 generateToken(char const* b32key);
 
@@ -88,7 +92,8 @@ class AuthSocket : public MaNGOS::Socket
         // between enUS and enGB, which is important for the patch system
         std::string _localizationName;
         uint16 _build;
-        AccountTypes _accountSecurityLevel;
+        typedef std::map<uint32, AccountTypes> AccountSecurityMap;
+        AccountSecurityMap _accountSecurityLevel;
 
         virtual bool ProcessIncomingData() override;
 };
