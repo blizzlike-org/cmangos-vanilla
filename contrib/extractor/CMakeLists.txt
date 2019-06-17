@@ -43,4 +43,4 @@ if(MSVC)
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER "Extractors")
 endif()
 
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
+install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
