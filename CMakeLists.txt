@@ -139,8 +139,14 @@ set(CONF_FOLDER_NAME etc)
 set(LIBS_FOLDER_NAME lib)
 
 # Set Install folders
-set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/${BIN_FOLDER_NAME})
-set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/${CONF_FOLDER_NAME})
+if(UNIX)
+  INCLUDE(GNUInstallDirs)
+  set(BIN_DIR ${CMAKE_INSTALL_BINDIR})
+  set(CONF_DIR ${CMAKE_INSTALL_SYSCONFDIR})
+else()
+  set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/${BIN_FOLDER_NAME})
+  set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/${CONF_FOLDER_NAME})
+endif()
 set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${LIBS_FOLDER_NAME})
 
 # On windows define more developpement folders and install provided libs
@@ -354,7 +360,16 @@ add_subdirectory(dep)
 set(DEFINITIONS "")
 
 if(UNIX)
+<<<<<<< HEAD
   set(DEFINITIONS SYSCONFDIR="../${CONF_FOLDER_NAME}/")
+=======
+  # workaround the current behavior of config discovery
+  if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_SYSCONFDIR})
+    set(DEFINITIONS SYSCONFDIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_SYSCONFDIR}/")
+  else()
+    set(DEFINITIONS SYSCONFDIR="${CMAKE_INSTALL_SYSCONFDIR}/")
+  endif()
+>>>>>>> be2a1cdc8... fix script permissions and install path locations
 endif()
 
 if(POSTGRESQL)
