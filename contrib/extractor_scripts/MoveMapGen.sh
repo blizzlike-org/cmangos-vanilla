@@ -23,7 +23,7 @@ EXCLUDE_MAPS=""
 #EXCLUDE_MAPS="0 1 530 571" # example to exclude the continents
 
 ## Offmesh file
-OFFMESH_FILE="offmesh.txt"
+OFFMESH_FILE="@@DATAROOTDIR@@/offmesh.txt"
 
 ## Normal log file (if not overwritten by second param
 LOG_FILE="MoveMapGen.log"

@@ -103,7 +103,11 @@ if (BUILD_EXTRACTORS)
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
   endif()
 
+  file(READ "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh" MMGSH)
+  string(REPLACE "@@DATAROOTDIR@@" ${CMAKE_INSTALL_FULL_DATAROOTDIR} MMGSH_GENERATED "${MMGSH}")
+  file(WRITE "${CMAKE_BINARY_DIR}/contrib/MoveMapGen.sh" "${MMGSH_GENERATED}")
+
   install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
-  install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh" DESTINATION ${BIN_DIR})
-  install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt" DESTINATION ${BIN_DIR})
+  install(FILES "${CMAKE_BINARY_DIR}/contrib/MoveMapGen.sh" PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE DESTINATION ${BIN_DIR})
+  install(FILES "${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR})
 endif()
