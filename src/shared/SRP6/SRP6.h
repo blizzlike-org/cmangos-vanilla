@@ -34,13 +34,35 @@ class SRP6
         SRP6(void);
         ~SRP6(void);
 
+        void CalculateBField(void);
+        void CalculateKField(void);
+        void CalculateMField(std::string username);
+        bool CalculateSField(uint8* lp_A, int l);
         void CalculatevsFields(const std::string& rI);
+
+        bool CompareM(uint8* lp_M, int l);
+
+        void FinishSRP(Sha1Hash& sha);
 
         const char* GetsAsHexStr(void) { return s_hex; };
         const char* GetvAsHexStr(void) { return v_hex; };
+        const char* GetKAsHexStr(void) { return K.AsHexStr(); };
+        BigNumber GetK(void) { return K; };
+        uint8* GetMAsByteArray(void) { return M.AsByteArray(); };
+        uint8* GetBAsByteArray(int minSize = 0) { return B.AsByteArray(minSize); };
+        uint8* GetgAsByteArray(void) { return g.AsByteArray(); };
+        uint8* GetNAsByteArray(int minSize = 0) { return N.AsByteArray(minSize); };
+
+        void SetKAsHexStr(const char* new_K) { K.SetHexStr(new_K); };
+        void SetsAsHexStr(const char* new_s) { s.SetHexStr(new_s); };
+        void SetvAsHexStr(const char* new_v) { v.SetHexStr(new_v); };
 
     private:
+        BigNumber A, u, S;
         BigNumber N, s, g, v;
+        BigNumber b, B;
+        BigNumber K;
+        BigNumber M;
 
         const char* v_hex;
         const char* s_hex;
