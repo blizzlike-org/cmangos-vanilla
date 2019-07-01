@@ -49,14 +49,12 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_ALREADY_EXIST;                       // username does already exist
     }
 
-    std::string sha_pass_hash = CalculateShaPassHash(username, password);
-
     SRP6* srp = new SRP6();
-    srp->CalculatevsFields(sha_pass_hash);
+    srp->CalculatevsFields(CalculateShaPassHash(username, password));
 
     bool update_sv = LoginDatabase.PExecute(
-        "INSERT INTO account(username,sha_pass_hash,v,s,joindate) VALUES('%s','%s','%s','%s',NOW())",
-            username.c_str(), sha_pass_hash.c_str(), srp->GetvAsHexStr(), srp->GetsAsHexStr());
+        "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s',NOW())",
+            username.c_str(), srp->GetvAsHexStr(), srp->GetsAsHexStr());
     delete srp;
 
     if (!update_sv)
@@ -126,17 +124,15 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     normalizeString(new_uname);
     normalizeString(new_passwd);
 
-    std::string sha_pass_hash = CalculateShaPassHash(new_uname, new_passwd);
-
     SRP6* srp = new SRP6();
-    srp->CalculatevsFields(sha_pass_hash);
+    srp->CalculatevsFields(CalculateShaPassHash(new_uname, new_passwd));
 
     std::string safe_new_uname = new_uname;
     LoginDatabase.escape_string(safe_new_uname);
 
     bool update_sv = LoginDatabase.PExecute(
-        "UPDATE account SET v='%s',s='%s',username='%s',sha_pass_hash='%s' WHERE id='%u'",
-            srp->GetvAsHexStr(), srp->GetsAsHexStr(), safe_new_uname.c_str(), sha_pass_hash.c_str(), accid);
+        "UPDATE account SET v='%s',s='%s',username='%s' WHERE id='%u'",
+            srp->GetvAsHexStr(), srp->GetsAsHexStr(), safe_new_uname.c_str(), accid);
     delete srp;
 
     if (!update_sv)
@@ -158,14 +154,12 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     normalizeString(username);
     normalizeString(new_passwd);
 
-    std::string sha_pass_hash = CalculateShaPassHash(username, new_passwd);
-
     SRP6* srp = new SRP6();
-    srp->CalculatevsFields(sha_pass_hash);
+    srp->CalculatevsFields(CalculateShaPassHash(username, new_passwd));
 
     bool update_sv = LoginDatabase.PExecute(
-        "UPDATE account SET v='%s', s='%s', sha_pass_hash='%s' WHERE id='%u'",
-            srp->GetvAsHexStr(), srp->GetsAsHexStr(), sha_pass_hash.c_str(), accid);
+        "UPDATE account SET v='%s', s='%s' WHERE id='%u'",
+            srp->GetvAsHexStr(), srp->GetsAsHexStr(), accid);
     delete srp;
 
     // also reset s and v to force update at next realmd login

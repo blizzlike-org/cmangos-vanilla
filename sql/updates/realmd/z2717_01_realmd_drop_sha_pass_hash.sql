@@ -1,0 +1,3 @@
+ALTER TABLE realmd_db_version CHANGE COLUMN required_z2716_01_realmd_totp required_z2717_01_realmd_drop_sha_pass_hash bit;
+
+ALTER TABLE account DROP COLUMN sha_pass_hash;
