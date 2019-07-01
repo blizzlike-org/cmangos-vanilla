@@ -39,8 +39,10 @@ class SRP6
         void CalculateMField(std::string username);
         bool CalculateSField(uint8* lp_A, int l);
         void CalculatevsFields(const std::string& rI);
+        void CalculatevsFields(const std::string& rI, const char* salt);
 
         bool CompareM(uint8* lp_M, int l);
+        bool Comparev(std::string vC);
 
         void FinishSRP(Sha1Hash& sha);
 
