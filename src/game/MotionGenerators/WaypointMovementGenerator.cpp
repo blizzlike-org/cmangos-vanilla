@@ -157,10 +157,6 @@ void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
 
 void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 {
-    // already arrived?
-    if (m_lastReachedWaypoint == i_currentNode)
-        return;
-
     m_lastReachedWaypoint = m_currentWaypointNode->first;
 
     WaypointNode const& node = m_currentWaypointNode->second;
