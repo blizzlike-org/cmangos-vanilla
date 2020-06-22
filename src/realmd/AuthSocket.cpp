@@ -31,6 +31,8 @@
 #include "AuthCodes.h"
 #include "SRP6/SRP6.h"
 
+#include "../game/World/World.h"
+
 #include <openssl/md5.h>
 #include <ctime>
 #include <utility>
@@ -853,7 +855,12 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 pkt << i.second.address;                   // address
                 pkt << float(i.second.populationLevel);
                 pkt << uint8(AmountOfCharacters);
-                pkt << uint8(i.second.timezone);           // realm category
+                if (i.second.timezone == REALM_ZONE_TEST_SERVER && !ok_build)
+                    pkt << uint8(REALM_ZONE_UNKNOWN);          // realm category
+                else if (i.second.timezone == REALM_ZONE_ENGLISH && !ok_build)
+                    pkt << uint8(REALM_ZONE_DEVELOPMENT);      // realm category
+                else
+                    pkt << uint8(i.second.timezone);           // realm category
                 pkt << uint8(0x00);                         // unk, may be realm number/id?
             }
 
@@ -911,7 +918,12 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 pkt << i.second.address;                   // address
                 pkt << float(i.second.populationLevel);
                 pkt << uint8(AmountOfCharacters);
-                pkt << uint8(i.second.timezone);           // realm category (Cfg_Categories.dbc)
+                if (i.second.timezone == REALM_ZONE_UNKNOWN)
+                    pkt << uint8(REALM_ZONE_TEST_SERVER);   // realm category (Cfg_Categories.dbc)
+                else if(i.second.timezone == REALM_ZONE_DEVELOPMENT && !ok_build)
+                    pkt << uint8(REALM_ZONE_ENGLISH);       // realm category (Cfg_Categories.dbc)
+                else
+                    pkt << uint8(i.second.timezone);        // realm category (Cfg_Categories.dbc)
                 pkt << uint8(0x2C);                         // unk, may be realm number/id?
 
                 if (realmFlags & REALM_FLAG_SPECIFYBUILD)
